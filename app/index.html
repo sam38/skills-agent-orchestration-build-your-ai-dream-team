@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Pulse</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#dashboard">Skip to project list</a>
+
+  <header class="dashboard-header" role="banner">
+    <h1>Project Pulse</h1>
+    <p class="dashboard-subtitle">A quick-glance view of active project health.</p>
+  </header>
+
+  <main
+    class="dashboard"
+    id="dashboard"
+    aria-label="Active projects"
+    aria-live="polite"
+  >
+    <!-- Project cards are rendered here by the script below -->
+  </main>
+
+  <script>
+    // Normalizes a free-text status/priority value into a CSS-friendly,
+    // lowercase-hyphenated token (e.g. "On Track" -> "on-track") so unknown
+    // values still get a safe, valid data-attribute for CSS to key off of.
+    function toToken(value) {
+      return String(value || 'unknown')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '') || 'unknown';
+    }
+
+    async function loadProjects() {
+      const dashboard = document.getElementById('dashboard');
+
+      try {
+        const response = await fetch('project-data.json');
+        if (!response.ok) {
+          throw new Error('Failed to fetch project data: ' + response.status);
+        }
+
+        const data = await response.json();
+        const projects = Array.isArray(data.projects) ? data.projects : [];
+
+        if (projects.length === 0) {
+          renderEmptyState(dashboard);
+          return;
+        }
+
+        renderProjects(dashboard, projects);
+      } catch (error) {
+        console.error('Error loading project data:', error);
+        renderEmptyState(dashboard, 'Unable to load project data right now.');
+      }
+    }
+
+    function renderEmptyState(container, message) {
+      container.innerHTML = '';
+      const emptyState = document.createElement('p');
+      emptyState.className = 'empty-state';
+      emptyState.setAttribute('role', 'status');
+      emptyState.textContent = message || 'No projects to display yet.';
+      container.appendChild(emptyState);
+    }
+
+    function renderProjects(container, projects) {
+      container.innerHTML = '';
+
+      projects.forEach(function (project) {
+        const statusText = project.status || 'Unknown';
+        const priorityText = project.priority || 'Unset';
+        const statusToken = toToken(project.status);
+        const priorityToken = toToken(project.priority);
+
+        const card = document.createElement('article');
+        card.className = 'project-card';
+        card.setAttribute('data-status', statusToken);
+        card.setAttribute('data-priority', priorityToken);
+        card.setAttribute(
+          'aria-label',
+          (project.name || 'Untitled project') +
+            ', status ' + statusText + ', priority ' + priorityText
+        );
+
+        const cardHeader = document.createElement('div');
+        cardHeader.className = 'project-card-header';
+
+        const name = document.createElement('h2');
+        name.className = 'project-name';
+        name.textContent = project.name || 'Untitled Project';
+        cardHeader.appendChild(name);
+
+        const priority = document.createElement('span');
+        priority.className = 'priority-badge';
+        priority.setAttribute('data-priority', priorityToken);
+        const priorityLabel = document.createElement('span');
+        priorityLabel.className = 'visually-hidden';
+        priorityLabel.textContent = 'Priority: ';
+        priority.appendChild(priorityLabel);
+        priority.appendChild(document.createTextNode(priorityText));
+        cardHeader.appendChild(priority);
+
+        card.appendChild(cardHeader);
+
+        const meta = document.createElement('dl');
+        meta.className = 'project-meta';
+
+        function addMetaRow(label, valueText, valueClass) {
+          const dt = document.createElement('dt');
+          dt.className = 'meta-label';
+          dt.textContent = label;
+          const dd = document.createElement('dd');
+          dd.className = valueClass;
+          dd.textContent = valueText;
+          meta.appendChild(dt);
+          meta.appendChild(dd);
+        }
+
+        addMetaRow('Owner', project.owner || 'Unassigned', 'owner');
+
+        const statusDt = document.createElement('dt');
+        statusDt.className = 'meta-label';
+        statusDt.textContent = 'Status';
+        const statusDd = document.createElement('dd');
+        statusDd.className = 'status-value';
+        const statusBadge = document.createElement('span');
+        statusBadge.className = 'status-badge';
+        statusBadge.setAttribute('data-status', statusToken);
+        statusBadge.textContent = statusText;
+        statusDd.appendChild(statusBadge);
+        meta.appendChild(statusDt);
+        meta.appendChild(statusDd);
+
+        addMetaRow(
+          'Recent activity',
+          project.recentActivity || 'No recent activity',
+          'recent-activity'
+        );
+
+        card.appendChild(meta);
+        container.appendChild(card);
+      });
+    }
+
+    loadProjects();
+  </script>
+</body>
+</html>

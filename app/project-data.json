@@ -1,0 +1,46 @@
+{
+  "projects": [
+    {
+      "name": "Aurora Checkout Redesign",
+      "owner": "Priya Nair",
+      "status": "On Track",
+      "recentActivity": "Merged auth PR #142",
+      "priority": "High"
+    },
+    {
+      "name": "Vendor Payments Integration",
+      "owner": "Marcus Lee",
+      "status": "At Risk",
+      "recentActivity": "Waiting on vendor API access",
+      "priority": "High"
+    },
+    {
+      "name": "Internal Analytics Revamp",
+      "owner": "Sofia Torres",
+      "status": "Blocked",
+      "recentActivity": "Data pipeline outage under investigation",
+      "priority": "Medium"
+    },
+    {
+      "name": "Mobile Onboarding Flow",
+      "owner": "Ahmed Khan",
+      "status": "On Track",
+      "recentActivity": "Shipped v2.3 to TestFlight",
+      "priority": "Medium"
+    },
+    {
+      "name": "Docs Site Migration",
+      "owner": "Grace Kim",
+      "status": "On Track",
+      "recentActivity": "Migrated 80% of pages to new CMS",
+      "priority": "Low"
+    },
+    {
+      "name": "Legacy Billing Cleanup",
+      "owner": "Diego Alvarez",
+      "status": "At Risk",
+      "recentActivity": "Found data mismatch in staging",
+      "priority": "Low"
+    }
+  ]
+}
